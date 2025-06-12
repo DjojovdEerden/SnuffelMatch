@@ -1,5 +1,50 @@
 <?php
+error_reporting(0);
+ini_set('display_errors', 0);
+
 require_once 'PHP/config.php';
+
+$animals = [];
+$db_ok = false;
+
+if (isset($conn) && $conn) {
+    $sql = "SELECT * FROM dier";
+    $result = $conn->query($sql);
+
+    if ($result && $result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $animals[] = $row;
+        }
+        $db_ok = true;
+    }
+}
+
+// Fallback: if database fails, use example animals
+if (!$db_ok) {
+    $animals = [
+        [
+            'naam' => 'Max',
+            'ras' => 'Labrador Retriever',
+            'leeftijd' => 2,
+            'beschrijving' => 'Energieke en vriendelijke labrador die dol is op wandelen en spelen. Goed met kinderen en andere honden.',
+            'afbeelding' => 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80'
+        ],
+        [
+            'naam' => 'Luna',
+            'ras' => 'Siamese',
+            'leeftijd' => 1,
+            'beschrijving' => 'Mooie Siamese kat met opvallende blauwe ogen. Zeer aanhankelijk en dol op knuffelen.',
+            'afbeelding' => 'https://images.unsplash.com/photo-1518717758536-85ae29035b6d?auto=format&fit=crop&w=1000&q=80'
+        ],
+        [
+            'naam' => 'Charlie',
+            'ras' => 'Parkiet',
+            'leeftijd' => 3,
+            'beschrijving' => 'Kleurrijke papegaai die graag zingt en geluiden nadoet. Geweldige metgezel voor vogelliefhebbers.',
+            'afbeelding' => 'https://images.unsplash.com/photo-1508672019048-805c876b67e2?auto=format&fit=crop&w=1000&q=80'
+        ]
+    ];
+}
 ?>
 <!DOCTYPE html>
 <html lang="nl">
@@ -199,16 +244,18 @@ require_once 'PHP/config.php';
 
     <main class="swipe-container">
         <div class="card-container">
-            <div class="card">
-                <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" alt="Dog" class="card-image">
-                <div class="card-info">
-                    <h2>Max</h2>
-                    <div class="details">
-                        <span>Labrador Retriever</span> • <span>2 jaar</span>
+            <?php foreach ($animals as $index => $animal): ?>
+                <div class="card" style="<?= $index === 0 ? '' : 'display:none;' ?>">
+                    <img src="<?= htmlspecialchars($animal['afbeelding']) ?>" alt="<?= htmlspecialchars($animal['naam']) ?>" class="card-image">
+                    <div class="card-info">
+                        <h2><?= htmlspecialchars($animal['naam']) ?></h2>
+                        <div class="details">
+                            <span><?= htmlspecialchars($animal['ras']) ?></span> • <span><?= htmlspecialchars($animal['leeftijd']) ?> jaar</span>
+                        </div>
+                        <p><?= htmlspecialchars($animal['beschrijving']) ?></p>
                     </div>
-                    <p>Energieke en vriendelijke labrador die dol is op wandelen en spelen. Goed met kinderen en andere honden.</p>
                 </div>
-            </div>
+            <?php endforeach; ?>
         </div>
 
         <div class="action-buttons">

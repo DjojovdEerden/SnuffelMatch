@@ -1,5 +1,6 @@
 <?php
-require_once 'PHP/config.php';
+session_start();
+var_dump($_SESSION);
 ?>
 <!DOCTYPE html>
 <html lang="nl">
@@ -260,8 +261,8 @@ require_once 'PHP/config.php';
             <p>Ontdek en match met dieren die bij jou passen. SnuffelMatch maakt het vinden van je nieuwe beste vriend eenvoudig en leuk!</p>
             <img src="https://images.unsplash.com/photo-1548767797-d8c844163c4c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" alt="Happy dog" class="hero-image">
             <div style="display: flex; gap: 20px; justify-content: center;">
-                <a href="swipe.html" class="cta-button"><i class="fas fa-heart"></i> Start met matchen</a>
-                <a href="animals.html" class="cta-button" style="background-color: #4CAF50;"><i class="fas fa-paw"></i> Bekijk dieren</a>
+                <a href="swipe.php" class="cta-button"><i class="fas fa-heart"></i> Start met matchen</a>
+                <a href="animals.php" class="cta-button" style="background-color: #4CAF50;"><i class="fas fa-paw"></i> Bekijk dieren</a>
             </div>
         </div>
     </section>
