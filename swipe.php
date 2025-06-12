@@ -1,4 +1,5 @@
 <?php
+session_start();
 error_reporting(0);
 ini_set('display_errors', 0);
 
@@ -7,19 +8,17 @@ require_once 'PHP/config.php';
 $animals = [];
 $db_ok = false;
 
-if (isset($conn) && $conn) {
-    $sql = "SELECT * FROM dier";
-    $result = $conn->query($sql);
-
-    if ($result && $result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            $animals[] = $row;
-        }
+// Use PDO for database connection
+try {
+    $stmt = $pdo->query("SELECT * FROM dier");
+    $animals = $stmt->fetchAll();
+    if (count($animals) > 0) {
         $db_ok = true;
     }
+} catch (Exception $e) {
+    $db_ok = false;
 }
 
-// Fallback: if database fails, use example animals
 if (!$db_ok) {
     $animals = [
         [
@@ -237,15 +236,31 @@ if (!$db_ok) {
                 display: none;
             }
         }
+
+        .reject-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
     </style>
 </head>
 <body>
     <?php include 'PHP/header.php'; ?>
 
     <main class="swipe-container">
+        <?php if (!isset($_SESSION['user_id'])): ?>
+            <div style="text-align:center; margin-top:100px; font-size:1.2em;">Log in om te kunnen swipen en liken!</div>
+        <?php elseif ($db_ok): ?>
         <div class="card-container">
             <?php foreach ($animals as $index => $animal): ?>
-                <div class="card" style="<?= $index === 0 ? '' : 'display:none;' ?>">
+                <div class="card" data-id="<?= htmlspecialchars($animal['id']) ?>" style="<?= $index === 0 ? '' : 'display:none;' ?>">
                     <img src="<?= htmlspecialchars($animal['afbeelding']) ?>" alt="<?= htmlspecialchars($animal['naam']) ?>" class="card-image">
                     <div class="card-info">
                         <h2><?= htmlspecialchars($animal['naam']) ?></h2>
@@ -257,7 +272,6 @@ if (!$db_ok) {
                 </div>
             <?php endforeach; ?>
         </div>
-
         <div class="action-buttons">
             <button class="action-button dislike-button">
                 <i class="fas fa-times"></i>
@@ -266,79 +280,87 @@ if (!$db_ok) {
                 <i class="fas fa-heart"></i>
             </button>
         </div>
+        <?php endif; ?>
     </main>
 
-    <div class="match-overlay">
+    <div class="match-overlay" style="display:none;">
         <div class="match-content">
-            <h2>It's a Match! 🎉</h2>
-            <p>Je hebt een match met Max!</p>
-            <button class="cta-button">Bekijk match</button>
+            <h2>Je hebt dit dier geliked! ❤️</h2>
+        </div>
+    </div>
+    <div class="reject-overlay" style="display:none;">
+        <div class="match-content">
+            <h2>Je hebt dit dier afgewezen!</h2>
         </div>
     </div>
 
+    <?php if (isset($_SESSION['user_id']) && $db_ok): ?>
     <script>
-        // Basic swipe functionality
-        const card = document.querySelector('.card');
-        const likeButton = document.querySelector('.like-button');
-        const dislikeButton = document.querySelector('.dislike-button');
-        const matchOverlay = document.querySelector('.match-overlay');
-
-        let isDragging = false;
-        let startX = 0;
-        let currentX = 0;
-
-        card.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            startX = e.clientX;
-            card.style.transition = 'none';
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            currentX = e.clientX - startX;
-            card.style.transform = `translateX(${currentX}px) rotate(${currentX * 0.1}deg)`;
-        });
-
-        document.addEventListener('mouseup', () => {
-            if (!isDragging) return;
-            isDragging = false;
-            card.style.transition = 'transform 0.3s ease';
-            
-            if (Math.abs(currentX) > 100) {
-                // Swipe threshold reached
-                if (currentX > 0) {
-                    // Swiped right (like)
-                    card.style.transform = 'translateX(200%) rotate(20deg)';
-                    setTimeout(() => {
-                        matchOverlay.style.display = 'flex';
-                    }, 300);
-                } else {
-                    // Swiped left (dislike)
-                    card.style.transform = 'translateX(-200%) rotate(-20deg)';
-                }
-            } else {
-                // Return to center
-                card.style.transform = 'translateX(0) rotate(0)';
+    const cards = document.querySelectorAll('.card');
+    let current = 0;
+    const matchOverlay = document.querySelector('.match-overlay');
+    const rejectOverlay = document.querySelector('.reject-overlay');
+    function likePet() {
+        if (current >= cards.length) return;
+        const card = cards[current];
+        const dierId = card.getAttribute('data-id');
+        fetch('like_pet.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'dier_id=' + dierId
+        }).then(response => response.text()).then(result => {
+            if (result === 'NOT_LOGGED_IN') {
+                alert('Je bent niet ingelogd!');
+                return;
             }
-        });
-
-        // Button click handlers
-        likeButton.addEventListener('click', () => {
+            // Animate card swipe right
+            card.style.transition = 'transform 0.5s ease, opacity 0.5s ease';
             card.style.transform = 'translateX(200%) rotate(20deg)';
+            card.style.opacity = '0';
+            // Show overlay
+            matchOverlay.style.display = 'flex';
             setTimeout(() => {
-                matchOverlay.style.display = 'flex';
-            }, 300);
+                matchOverlay.style.display = 'none';
+                card.style.display = 'none';
+                current++;
+                if (current < cards.length) {
+                    cards[current].style.display = '';
+                }
+            }, 1000);
         });
-
-        dislikeButton.addEventListener('click', () => {
+    }
+    function dislikePet() {
+        if (current >= cards.length) return;
+        const card = cards[current];
+        const dierId = card.getAttribute('data-id');
+        fetch('like_pet.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'dier_id=' + dierId + '&richting=DISLIKE'
+        }).then(response => response.text()).then(result => {
+            if (result === 'NOT_LOGGED_IN') {
+                alert('Je bent niet ingelogd!');
+                return;
+            }
+            // Animate card swipe left
+            card.style.transition = 'transform 0.5s ease, opacity 0.5s ease';
             card.style.transform = 'translateX(-200%) rotate(-20deg)';
+            card.style.opacity = '0';
+            // Show reject overlay
+            rejectOverlay.style.display = 'flex';
+            setTimeout(() => {
+                rejectOverlay.style.display = 'none';
+                card.style.display = 'none';
+                current++;
+                if (current < cards.length) {
+                    cards[current].style.display = '';
+                }
+            }, 1000);
         });
-
-        // Close match overlay
-        matchOverlay.addEventListener('click', () => {
-            matchOverlay.style.display = 'none';
-            // Here you would typically load the next card
-        });
+    }
+    document.querySelector('.like-button').addEventListener('click', likePet);
+    document.querySelector('.dislike-button').addEventListener('click', dislikePet);
     </script>
+    <?php endif; ?>
 </body>
 </html> 
