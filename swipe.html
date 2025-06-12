@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnuffelMatch - Swipe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #FF6B6B;
+            text-decoration: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            margin-left: 30px;
+            font-weight: 500;
+        }
+
+        /* Swipe Container */
+        .swipe-container {
+            margin-top: 100px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .card-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            height: 600px;
+            margin: 0 auto;
+        }
+
+        .card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            cursor: grab;
+        }
+
+        .card:active {
+            cursor: grabbing;
+        }
+
+        .card-image {
+            width: 100%;
+            height: 70%;
+            object-fit: cover;
+        }
+
+        .card-info {
+            padding: 20px;
+        }
+
+        .card-info h2 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .card-info .details {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .card-info p {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .action-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            background: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .action-button:hover {
+            transform: scale(1.1);
+        }
+
+        .action-button i {
+            font-size: 24px;
+        }
+
+        .dislike-button {
+            color: #FF6B6B;
+        }
+
+        .like-button {
+            color: #4CAF50;
+        }
+
+        /* Match Animation */
+        .match-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .match-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+        }
+
+        .match-content h2 {
+            color: #FF6B6B;
+            margin-bottom: 20px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .card-container {
+                height: 500px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <a href="index.html" class="logo"><i class="fas fa-paw"></i> SnuffelMatch</a>
+            <div class="nav-links">
+                <a href="index.html"><i class="fas fa-home"></i> Home</a>
+                <a href="#"><i class="fas fa-heart"></i> Matches</a>
+                <a href="#"><i class="fas fa-user"></i> Profiel</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="swipe-container">
+        <div class="card-container">
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" alt="Dog" class="card-image">
+                <div class="card-info">
+                    <h2>Max</h2>
+                    <div class="details">
+                        <span>Labrador Retriever</span> • <span>2 jaar</span>
+                    </div>
+                    <p>Energieke en vriendelijke labrador die dol is op wandelen en spelen. Goed met kinderen en andere honden.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="action-button dislike-button">
+                <i class="fas fa-times"></i>
+            </button>
+            <button class="action-button like-button">
+                <i class="fas fa-heart"></i>
+            </button>
+        </div>
+    </main>
+
+    <div class="match-overlay">
+        <div class="match-content">
+            <h2>It's a Match! 🎉</h2>
+            <p>Je hebt een match met Max!</p>
+            <button class="cta-button">Bekijk match</button>
+        </div>
+    </div>
+
+    <script>
+        // Basic swipe functionality
+        const card = document.querySelector('.card');
+        const likeButton = document.querySelector('.like-button');
+        const dislikeButton = document.querySelector('.dislike-button');
+        const matchOverlay = document.querySelector('.match-overlay');
+
+        let isDragging = false;
+        let startX = 0;
+        let currentX = 0;
+
+        card.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX;
+            card.style.transition = 'none';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            currentX = e.clientX - startX;
+            card.style.transform = `translateX(${currentX}px) rotate(${currentX * 0.1}deg)`;
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (!isDragging) return;
+            isDragging = false;
+            card.style.transition = 'transform 0.3s ease';
+            
+            if (Math.abs(currentX) > 100) {
+                // Swipe threshold reached
+                if (currentX > 0) {
+                    // Swiped right (like)
+                    card.style.transform = 'translateX(200%) rotate(20deg)';
+                    setTimeout(() => {
+                        matchOverlay.style.display = 'flex';
+                    }, 300);
+                } else {
+                    // Swiped left (dislike)
+                    card.style.transform = 'translateX(-200%) rotate(-20deg)';
+                }
+            } else {
+                // Return to center
+                card.style.transform = 'translateX(0) rotate(0)';
+            }
+        });
+
+        // Button click handlers
+        likeButton.addEventListener('click', () => {
+            card.style.transform = 'translateX(200%) rotate(20deg)';
+            setTimeout(() => {
+                matchOverlay.style.display = 'flex';
+            }, 300);
+        });
+
+        dislikeButton.addEventListener('click', () => {
+            card.style.transform = 'translateX(-200%) rotate(-20deg)';
+        });
+
+        // Close match overlay
+        matchOverlay.addEventListener('click', () => {
+            matchOverlay.style.display = 'none';
+            // Here you would typically load the next card
+        });
+    </script>
+</body>
+</html> 
